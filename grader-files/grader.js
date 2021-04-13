@@ -38,14 +38,10 @@ function read_class(){
 function init_grading(){
     let active_group = [];
     for (let s of grader_class){
-        console.log(s[1]);
-        console.log($("#group_selector option:selected").text());
         if (s[1] === $("#group_selector option:selected").text()){
             active_group.push(s);
         }
     }
-    console.log(active_group);
-    console.log(grader_configuration);
     $("#startup_box").hide();
     let dimensions = Object.keys(grader_configuration);
     let aspects = [];
@@ -69,10 +65,13 @@ function init_grading(){
     }
     let color_counter = 0;
     for (let asp of aspects){
+        if (asp !== undefined) {
+            grid_string += "<div class=\"row mb-2 align-items-center\" style='background-color: " + color_palette[color_counter] + "'><div class='col text-center'><b>" + asp + "</b></div></div>";
+        }
         for (let dim of dimensions){
-            if (asp === "[unnamed]" || grader_configuration[dim].aspect === asp){
+            if (dim !== "exam_settings" && (asp === "[unnamed]" || grader_configuration[dim].aspect === asp)){
                 grid_string += "<div class=\"row mb-2 align-items-center \" style='background-color: "+ color_palette[color_counter] +"'>";
-                grid_string += "<div class=\"col align-self-center\">"+ dim.replaceAll("_", " ") + "</div>";
+                grid_string += "<div class=\"col align-self-center\">"+ dim.replaceAll("_", " ") + " ("+ grader_configuration[dim].min + "-"+ grader_configuration[dim].max +")</div>";
                 for (let student of active_group){
                     grid_string += "<div class=\"col align-self-center\"><input type='number' min='"+ grader_configuration[dim].min +"' max='"+ grader_configuration[dim].max +"' style=\"width: 50px;\"></div>"
                 }
