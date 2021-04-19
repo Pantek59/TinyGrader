@@ -46,7 +46,9 @@ function init_grading(){
     let dimensions = Object.keys(grader_configuration);
     let aspects = [];
     for (let d of dimensions){
-        aspects.push(grader_configuration[d].aspect);
+        if (grader_configuration[d].aspect) {
+            aspects.push(grader_configuration[d].aspect);
+        }
     }
     aspects = aspects.filter(function (value, index, self) {
         return self.indexOf(value) === index
@@ -71,7 +73,7 @@ function init_grading(){
         for (let dim of dimensions){
             if (dim !== "exam_settings" && (asp === "[unnamed]" || grader_configuration[dim].aspect === asp)){
                 grid_string += "<div class=\"row mb-2 align-items-center \" style='background-color: "+ color_palette[color_counter] +"'>";
-                grid_string += "<div class=\"col align-self-center\">"+ dim.replaceAll("_", " ") + " ("+ grader_configuration[dim].min + "-"+ grader_configuration[dim].max +")</div>";
+                grid_string += "<div class=\"col align-self-center input-group-text\">"+ dim.replace(/_/g," ") + " ("+ grader_configuration[dim].min + "-"+ grader_configuration[dim].max +")</div>";
                 for (let student of active_group){
                     grid_string += "<div class=\"col align-self-center\"><input type='number' min='"+ grader_configuration[dim].min +"' max='"+ grader_configuration[dim].max +"' style=\"width: 50px;\"></div>"
                 }
