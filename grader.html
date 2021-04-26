@@ -13,21 +13,31 @@
 
 <body>
 <div id="startup_box" class="container">
-    <div>
-        <label for="config_file">Choose marking scheme (*.ini): </label>
-        <input type="file" id="config_file" accept=".ini" onchange="read_config()" name="">
-        <textarea id="config_area" disabled cols="40" rows="10"></textarea>
+    <div class="row">
+        <div class="col">
+            <label for="config_area">Choose marking scheme (*.ini): </label>
+        </div>
+        <div class="col">
+            <label for="class_area">Choose class list (*.csv): </label>
+        </div>
+        <div class="col">
+            <label for="group_selector">Choose group for grading</label><br>
+        </div>
     </div>
-    <div>
-        <label for="class_file">Choose class list (*.csv): </label>
-        <input type="file" id="class_file" accept=".csv" onchange="read_class()" name="">
-        <textarea id="class_area" disabled cols="40" rows="10"></textarea>
+    <div class="row mt-2">
+        <div class="col">
+            <input type="file" id="config_file" accept=".ini" onchange="read_config()" name="">
+            <textarea id="config_area" disabled cols="40" rows="10"></textarea>
+        </div>
+        <div class="col">
+            <input type="file" id="class_file" accept=".csv" onchange="read_class()" name="">
+            <textarea id="class_area" disabled cols="40" rows="10"></textarea>
+        </div>
+        <div class="col">
+            <select id="group_selector" size="8"><option>No class data loaded</option></select>
+        </div>
+        <button onclick="init_grading()">Start Grading</button>
     </div>
-    <div>
-        <label for="group_selector">Choose group for grading</label>
-        <select id="group_selector" size="8"><option>No class data loaded</option></select>
-    </div>
-    <button onclick="init_grading()">Start Grading</button>
 </div>
 <div class="fixed-table-body" id="grading_box">
 </div>
