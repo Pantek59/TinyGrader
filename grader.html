@@ -9,6 +9,11 @@
     <script type="text/javascript" src="scripts/csvparser.js"></script>
     <script type="text/javascript" src="scripts/toml.js"></script>
     <script type="text/javascript" src="scripts/grader.js"></script>
+    <script>
+        $(document).ready(function(){
+            $("#save_button").hide();
+        })
+    </script>
 </head>
 
 <body>
@@ -39,7 +44,12 @@
         <button onclick="init_grading()">Start Grading</button>
     </div>
 </div>
-<div class="fixed-table-body" id="grading_box">
+<div class="fixed-table-body" id="grading_box"></div>
+<div class="fixed-table-body mt-3" id="button_box">
+    <div class="container">
+        <button id="load_button" class="btn btn-dark">Load Class</button>
+        <button id="save_button" class="btn btn-dark" onclick="saveClass()">Save Class</button>
+    </div>
 </div>
 </body>
 </html>
