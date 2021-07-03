@@ -11,45 +11,57 @@
     <script type="text/javascript" src="scripts/grader.js"></script>
     <script>
         $(document).ready(function(){
-            $("#save_button").hide();
+            $("#loadSaveContainer").hide();
+            $("#class_list_loader").hide();
+            $("#class_list_selector").hide();
+            $("#config_area").hide();
         })
     </script>
 </head>
 
 <body>
-<div id="startup_box" class="container">
+<div class="container-fluid display-4 text-center mt-3 mb-3">Tiny Grader</div>
+<div id="startup_box" class="container-fluid m-2">
     <div class="row">
-        <div class="col">
-            <label for="config_area">Choose marking scheme (*.ini): </label>
+        <div class="col d-block text-center border" style="background-color: #ffff9c">
+            <label for="config_area">Choose marking scheme (*.ini):</label><br>
+            <input type="file" id="config_file" accept=".ini" onchange="read_config()">
+            <textarea class="m-3" id="config_area" disabled cols="80" rows="10"></textarea>
         </div>
-        <div class="col">
-            <label for="class_area">Choose class list (*.csv): </label>
-        </div>
-        <div class="col">
-            <label for="group_selector">Choose group for grading</label><br>
+        <div class="col d-block text-center border" style="background-color: #ff98fd">
+            <label for="combine_button">Choose marking files to combine (*.mrk):</label><br>
+            <input type="file" id="combine_button" onclick="combineMarks()" accept=".mrk" multiple>
         </div>
     </div>
-    <div class="row mt-2">
-        <div class="col">
-            <input type="file" id="config_file" accept=".ini" onchange="read_config()" name="">
-            <textarea id="config_area" disabled cols="40" rows="10"></textarea>
+    <div class="row">
+        <div class="col d-block text-center border" style="background-color: #ffff9c">
+            <div id="class_list_loader">
+                <label for="class_area">Choose student list (*.csv): </label><br>
+                <input type="file" id="class_file" accept=".csv" onchange="read_class()" name="">
+                <textarea id="class_area" disabled cols="80" rows="10" style="display: none"></textarea>
+            </div>
         </div>
-        <div class="col">
-            <input type="file" id="class_file" accept=".csv" onchange="read_class()" name="">
-            <textarea id="class_area" disabled cols="40" rows="10"></textarea>
+        <div class="col d-block text-center border" style="background-color: #ff98fd">
+            <div id="loadSaveContainer">
+                <label for="load_button">Load marking file (*.mrk)</label>
+                <input type="file" id="load_button" accept=".mrk" onchange="loadMarks()">
+            </div>
         </div>
-        <div class="col">
-            <select id="group_selector" size="8"><option>No class data loaded</option></select>
-        </div>
-        <button onclick="init_grading()">Start Grading</button>
     </div>
+    <div id="class_list_selector" class="row" style="display: none; background-color: #ffff9c">
+        <div class="col d-block text-center border">
+            <label for="group_selector">Choose group for grading:</label><br>
+            <select id="group_selector" size="5" style="width: 33%"><option>No class data loaded</option></select><br>
+            <button onclick="init_grading()">Start Grading</button>
+        </div>
+
+    </div>
+
 </div>
+
 <div class="fixed-table-body" id="grading_box"></div>
-<div class="fixed-table-body mt-3" id="button_box">
-    <div class="container">
-        <button id="load_button" class="btn btn-dark">Load Class</button>
-        <button id="save_button" class="btn btn-dark" onclick="saveClass()">Save Class</button>
-    </div>
+<div class="fixed-table-body mt-3 text-center" id="button_box">
+    <button id="save_button" class="btn btn-secondary" onclick="saveClass()" style="display: none">Save Marks</button>
 </div>
 </body>
 </html>
