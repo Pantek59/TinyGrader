@@ -15,22 +15,21 @@
             $("#class_list_loader").hide();
             $("#class_list_selector").hide();
             $("#config_area").hide();
+            $("#combineContainer").hide();
+            $("#classLabel").hide();
         })
     </script>
 </head>
 
 <body>
 <div class="container-fluid display-4 text-center mt-3 mb-3">Tiny Grader</div>
+<div class="container-fluid text-center mt-3 mb-3" id="classLabel">Class Label</div>
 <div id="startup_box" class="container-fluid m-2">
     <div class="row">
         <div class="col d-block text-center border" style="background-color: #ffff9c">
-            <label for="config_area">Choose marking scheme (*.ini):</label><br>
+            <label id="config_file_label" for="config_area">Choose marking scheme (*.ini):</label><br>
             <input type="file" id="config_file" accept=".ini" onchange="read_config()">
             <textarea class="m-3" id="config_area" disabled cols="80" rows="10"></textarea>
-        </div>
-        <div class="col d-block text-center border" style="background-color: #ff98fd">
-            <label for="combine_button">Choose marking files to combine (*.mrk):</label><br>
-            <input type="file" id="combine_button" onclick="combineMarks()" accept=".mrk" multiple>
         </div>
     </div>
     <div class="row">
@@ -43,8 +42,14 @@
         </div>
         <div class="col d-block text-center border" style="background-color: #ff98fd">
             <div id="loadSaveContainer">
-                <label for="load_button">Load marking file (*.mrk)</label>
+                <label for="load_button">Load marking file (*.mrk)</label><br>
                 <input type="file" id="load_button" accept=".mrk" onchange="loadMarks()">
+            </div>
+        </div>
+        <div class="col d-block text-center border" style="background-color: #ffc720">
+            <div id="combineContainer">
+                <label for="combine_button">Export sheet(s) to CSV (*.mrk):</label><br>
+                <input type="file" id="combine_button" onchange="combineMarks()" accept=".mrk" multiple>
             </div>
         </div>
     </div>
@@ -59,8 +64,8 @@
 
 </div>
 
-<div class="fixed-table-body" id="grading_box"></div>
-<div class="fixed-table-body mt-3 text-center" id="button_box">
+<div class="container-fluid" id="grading_box"></div>
+<div class="container-fluid mt-3 text-center" id="button_box">
     <button id="save_button" class="btn btn-secondary" onclick="saveClass()" style="display: none">Save Marks</button>
 </div>
 </body>

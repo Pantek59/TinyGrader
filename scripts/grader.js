@@ -1,4 +1,4 @@
-const color_palette = ["#0087ff", "#00d75f", "#8787ff", "#afaf00", "#d7ff00", "#ff5faf"];
+const color_palette = ["#d5f4e6", "#80ced6", "#fefbd8", "#618685", "#f4e1d2", "#b2b2b2"];
 let grader_configuration;
 let grader_class;
 let grader_groups = [];
@@ -31,9 +31,9 @@ function loadMarks() {
     reader.readAsText(file,"utf-8");
     reader.onload = function () {
         let t = encodeURI(reader.result);
-        try {loadedMarks = TOML.parse(sanitize(reader.result))}
+        try {loadedMarks = TOML.parse(reader.result)}
         catch (e) {console.log(e)}
-        init_grading(loadedMarks);
+        finally {init_grading(loadedMarks);}
     }
 }
 
@@ -50,10 +50,13 @@ function read_config() {
     saveLabel += file.name.substring(0, file.name.length - 4);
     schemeLabel = file.name;
     $("#loadSaveContainer").show();
+    $("#combineContainer").show();
     $("#load_button").show();
     $("#class_list_loader").show();
     $("#class_area").hide();
     $("#save_button").hide();
+    $("#config_file").hide();
+    $("#config_file_label").hide();
 }
 
 function read_class() {
@@ -99,6 +102,7 @@ function init_grading(loadedMarks) {
         for (let s of grader_class) {
             if (s[1] === $("#group_selector option:selected").text()) {
                 active_group.push(s);
+                $("#classLabel").text(saveLabel + " " + s[1]);
             }
         }
         saveLabel += " " + active_group[0][1] + ".mrk";
@@ -117,7 +121,8 @@ function init_grading(loadedMarks) {
                 active_group.push(obj);
             }
         }
-        saveLabel = loadedMarks.config.scheme.substring(0, loadedMarks.config.scheme.length - 4) + " " + loadedMarks.config.class + ".mrk";
+        saveLabel = loadedMarks.config.class + ".mrk";
+        $("#classLabel").text(group);
     }
 
     let dimensions = Object.keys(grader_configuration);
@@ -152,12 +157,12 @@ function init_grading(loadedMarks) {
         for (let dim of dimensions) {
             if (dim !== "exam_settings" && (asp === "[unnamed]" || grader_configuration[dim]["aspect"] === asp)) {
                 grid_string += "<div class=\"row mb-2 align-items-center \" style='background-color: " + color_palette[color_counter] + "'>";
-                grid_string += "<div class=\"col align-self-center input-group-text text-wrap\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" + grader_configuration[dim]["desc"] + "\">" + dim.replace(/_/g, " ") + " (" + grader_configuration[dim].min + "-" + grader_configuration[dim].max + ")</div>";
+                grid_string += "<div class=\"col align-self-center input-group-text text-wrap\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" + grader_configuration[dim]["desc"] + "\">" + dim.replace(/_/g, " ") + " (" + grader_configuration[dim].min + "-" + grader_configuration[dim].max + ") <span class='small text-muted ms-2'>w" + grader_configuration[dim]["weight"] + "</span></div>";
                 for (let student of active_group) {
 
                     if (grader_configuration[dim]["group_mark"]) {
                         grid_string += "<div class=\"col align-self-center text-center\"><input step='0.5' onclick='update_grading(this)' onkeyup='update_grading(this)' onchange='update_grading(this)' type='number' data-type='data_entry' data-student='" + student[0] + "' data-dimension='" + dim + "' data-aspect='" + asp + "' min='" + grader_configuration[dim].min + "' max='" + grader_configuration[dim].max + "' style=\"width: 75px;\"><br>";
-                        grid_string += " Group Mark: <span data-student='" + student[0] + "' data-type='group_mark' data-dimension='" + dim + "' data-aspect='" + asp + "'></span>";
+                        grid_string += " Group Result: <span data-student='" + student[0] + "' data-type='group_mark' data-dimension='" + dim + "' data-aspect='" + asp + "'></span>";
                     } else {
                         grid_string += "<div class=\"col align-self-center text-center\"><input step='0.5' onclick='update_grading(this)' onkeyup='update_grading(this)' onchange='update_grading(this)' type='number' data-type='individual_mark' data-student='" + student[0] + "' data-dimension='" + dim + "' data-aspect='" + asp + "' min='" + grader_configuration[dim].min + "' max='" + grader_configuration[dim].max + "' style=\"width: 75px;\">";
                     }
@@ -181,15 +186,22 @@ function init_grading(loadedMarks) {
         grid_string += "<div class=\"row\"></div>";
         color_counter++;
     }
-    grid_string += "<div class=\"row\"><div class='col'><b><u>Total Grade</b></u></div>";
+    grid_string += "<div class=\"row\"><div class='col'><b><u>Total Grade</u> (" + grader_configuration["exam_settings"]["scale_min"] + "-" + grader_configuration["exam_settings"]["scale_max"] + ")</b></div>";
     for (let student of active_group) {
         grid_string += "<div class='col align-self-center text-center'><input step='0.01' type='number' min='" + grader_configuration["exam_settings"]["scale_min"] + "' data-student='" + student[0] + "' data-dimension='total_grade' style=\"width: 70px;\" disabled></div>";
     }
-    grid_string += "</div></div>";
+    grid_string += "</div>";
+    grid_string += "<div class=\"row\"><div class='col'>Comment</div>";
+    for (let student of active_group) {
+        grid_string += "<div class='col align-self-center text-center mt-4'><textarea data-student='" + student[0] + "' data-dimension='comment_field' style=\"width: 100%; margin: 7px\" size='4'></textarea></div>";
+    }
+    grid_string += "</div>";
+    grid_string += "</div>";
 
     $("#startup_box").hide();
     $("#grading_box").html(grid_string);
     $("#save_button").show();
+    $("#classLabel").show();
     $("#load_button").hide();
     $("#load_button").empty();
     $("#config_file").empty();
@@ -207,6 +219,8 @@ function init_grading(loadedMarks) {
                         })
                     }
                 }
+                // Load comment field
+                $("[data-student='" + replaceAll(student,"_", " ") + "'][data-dimension='comment_field']").val(decodeURI(loadedMarks[student]["comment_field"]));
             }
         }
     }
@@ -241,7 +255,7 @@ function update_grading(element) {
         let elements = $(":input[data-dimension='" + affected_dimension + "'][data-aspect='" + affected_aspect + "']");
         elements.each(function () {
             let v = Number($(this).val());
-            if (v === 0) {
+            if ($(this).val() === "") {
                 total = 0;
                 return false;
             } else {
@@ -277,8 +291,9 @@ function calcAspectGrade(element) {
     $('[data-type="individual_mark"][data-student="' + affected_student + '"][data-aspect="' + affected_aspect + '"]').each(function () {
         if ($(this).val() !== "" && grader_configuration[$(this).data("dimension")]) {
             max_weight += grader_configuration[$(this).data("dimension")].weight * (grader_configuration[$(this).data("dimension")].max - grader_configuration[$(this).data("dimension")].min);
-            total_weight += ($(this).val() - grader_configuration["exam_settings"]["scale_min"]) * grader_configuration[$(this).data("dimension")].weight;
-        } else if ($(this).data("dimension") !== "grade") {
+            total_weight += ($(this).val() - grader_configuration[$(this).data("dimension")].min) * grader_configuration[$(this).data("dimension")].weight;
+        }
+        else if ($(this).data("dimension") !== "grade") {
             all_aspect_grades = false;
             return false;
         }
@@ -289,7 +304,7 @@ function calcAspectGrade(element) {
         let groupMarkList = $('[data-type="group_mark"][data-student="' + affected_student + '"][data-aspect="' + affected_aspect + '"]');
         groupMarkList.each(function () {
             let groupMark = Number($(this).text());
-            if (groupMark > 0) {
+            if ($(this).text() !== "") {
                 // group mark exists
                 max_weight += grader_configuration[$(this).data("dimension")].weight * (grader_configuration[$(this).data("dimension")].max - grader_configuration[$(this).data("dimension")].min);
                 total_weight += (groupMark - grader_configuration["exam_settings"]["scale_min"]) * grader_configuration[$(this).data("dimension")].weight;
@@ -302,7 +317,7 @@ function calcAspectGrade(element) {
 
         if (all_aspect_grades) {
             // Recalc aspect grade
-            let aspect_grade = Math.round((1 + (((grader_configuration["exam_settings"]["scale_max"]) - 1) * (total_weight / max_weight))) * 100) / 100;
+            let aspect_grade = Math.round((grader_configuration["exam_settings"]["scale_min"] + (((grader_configuration["exam_settings"]["scale_max"]) - grader_configuration["exam_settings"]["scale_min"]) * (total_weight / max_weight))) * 100) / 100;
             $("[data-dimension='grade'][data-student='" + affected_student + "'][data-aspect='" + affected_aspect + "']").val(aspect_grade);
         }
         else {
@@ -374,9 +389,10 @@ function saveClass() {
                 dimensionList.push($(this).data("dimension"));
             })
 
-        let saveString = "[config]\nscheme = \"" + schemeLabel + "\"\nreviewer = \"" + name + "\"";
+        let saveString = "[config]\nscheme = \"" + schemeLabel + "\"\nreviewer = \"" + name + "\"" + "\"\nclass = \"" + saveLabel.substring(0, saveLabel.length - 4) + "\"\n";
         for (let student of studentList) {
             saveString += "\n[" + replaceAll(student, " ", "_") + "]\n";
+            saveString += "comment_field = \"" + encodeURI($("[data-student='" + student + "'][data-dimension='comment_field']").val()) + "\"\n";
             for (let aspect of aspectList) {
                 saveString += "[" + replaceAll(student, " ", "_") + "." + aspect + "]\n";
                 for (let dimension of dimensionList) {
@@ -385,7 +401,6 @@ function saveClass() {
                 }
             }
         }
-        // TODO Add scheme into save file
         var element = document.createElement('a');
         element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(saveString));
         element.setAttribute('download', saveLabel);
@@ -396,12 +411,82 @@ function saveClass() {
     }
 }
 
-function combineMarks(){
+function combineMarks() {
+    let files = document.getElementById("combine_button").files;
+    let fileCounter = 0;
+    let grades = {}; // grades.aspect.dimension
 
+    for (let key of Object.keys(grader_configuration)) {
+        if (key !== "exam_settings") {
+            if (!grades[grader_configuration[key]["aspect"]]){
+                grades[grader_configuration[key]["aspect"]] = [];
+            }
+            grades[grader_configuration[key]["aspect"]].push(replaceAll(key, "_", " "));
+        }
+    }
+
+    let csvString = "Student;Class;Reviewer"
+    for (let aspect of Object.keys(grades)){
+        for (let dim of grades[aspect]){
+            csvString += ";" + dim + " (" + aspect + ")";
+        }
+        csvString += ";" + aspect + " Total";
+    }
+    csvString += ";Total Grade\n";
+
+    for (let file of files) {
+        const reader = new FileReader();
+        let loadedMarks;
+        reader.readAsText(file, "utf-8");
+        reader.onload = function () {
+            let t = encodeURI(reader.result);
+            try {
+                loadedMarks = TOML.parse(reader.result)
+            } catch (e) {
+                console.log(e)
+            } finally {
+                init_grading(loadedMarks);
+                let studentList = [];
+                for (let key of Object.keys(loadedMarks)) {
+                    if (key !== "config") {
+                        studentList.push(replaceAll(key, "_", " "));
+                    }
+                }
+                for (let studi of studentList){
+                    csvString += studi + ";" + loadedMarks.config.class + ";" + loadedMarks.config.reviewer;
+                    for (let aspect of Object.keys(grades)){
+                        for (let dim of grades[aspect]){
+                            csvString += ";" + $('[data-student="' + studi + '"][data-dimension="' + replaceAll(dim," ","_") + '"][data-aspect="' + aspect + '"][data-type!="group_mark"]').val();
+                        }
+                        csvString += ";" + $('[data-student="' + studi + '"][data-dimension="grade"][data-aspect="' + aspect + '"][data-type!="group_mark"]').val();
+                    }
+                    csvString += ";"+ $('[data-student="' + studi + '"][data-dimension="total_grade"]').val() +"\n";
+                }
+                fileCounter++;
+                exportCSV(fileCounter, files.length, csvString);
+            }
+        }
+    }
 }
 
+function exportCSV(numberOfFilesProcessed, totalFiles, csvString){
+    if (numberOfFilesProcessed === totalFiles) {
+        var element = document.createElement('a');
+        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(csvString));
+        element.setAttribute('download', "gradesheet.csv");
+        element.style.display = 'none';
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
+
+        window.location.reload(true)
+    }
+}
 function replaceAll(sentence, regx, replaceBy) {
-    return sentence.replace(regx, replaceBy);
+   while(sentence.indexOf(regx) > -1){
+        sentence = sentence.replace(regx, replaceBy);
+    }
+    return sentence;
 }
 
 function objectToCSV(objArray) {
