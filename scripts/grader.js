@@ -67,8 +67,10 @@ function read_class() {
         document.getElementById("class_area").value = class_raw;
         grader_class = CSVToArray(class_raw, ";");
         for (let student of grader_class) {
-            if (student.length == 2)
+            if (student.length > 1 && $("#group_mode_selector option:selected").val() == "group")
                 grader_groups.push(student[1]);
+            else
+                grader_groups.push(student[0]);
         }
         grader_groups = grader_groups.filter(function (value, index, self) {
             return self.indexOf(value) === index
@@ -100,9 +102,15 @@ function init_grading(loadedMarks) {
     if (loadedMarks === undefined) {
         // Load active students from class sheet
         for (let s of grader_class) {
-            if (s[1] === $("#group_selector option:selected").text()) {
-                active_group.push(s);
-                $("#classLabel").text(saveLabel + " " + s[1]);
+            if ($("#group_mode_selector option:selected").val() == "group") {
+                if (s[1] === $("#group_selector option:selected").text()) {
+                    active_group.push(s);
+                    $("#classLabel").text(saveLabel + " " + s[1]);
+                }
+            }
+            else if (s[0] === $("#group_selector option:selected").text()){
+                active_group.push([s[0],s[0]]);
+                $("#classLabel").text(saveLabel + " " + s[0]);
             }
         }
         saveLabel += " " + active_group[0][1] + ".mrk";
@@ -137,7 +145,7 @@ function init_grading(loadedMarks) {
     });
 
     // Create headers
-    let grid_string = "<div class=\"row\"><div class=\"col\"> </div>";
+    let grid_string = "<div class=\"row flex-nowrap\"><div class=\"col\"> </div>";
     for (let student of active_group) {
         grid_string += "<div class=\"col text-center\" data-name='student'>" + student[0] + "</div>"
     }
@@ -152,12 +160,12 @@ function init_grading(loadedMarks) {
     for (let asp of aspects) {
         let aspect_weight = 0;
         if (asp !== undefined) {
-            grid_string += "<div class=\"row mt-3 mb-2 align-items-center\" style='background-color: " + color_palette[color_counter] + "'><div class='col text-center'><b>" + asp.replace(/_/g, " ") + "</b></div></div>";
+            grid_string += "<div class=\"row flex-nowrap mt-3 mb-2 align-items-center\" style='background-color: " + color_palette[color_counter] + "'><div class='col text-center'><b>" + asp.replace(/_/g, " ") + "</b></div></div>";
         }
         for (let dim of dimensions) {
             if (dim !== "exam_settings" && (asp === "[unnamed]" || grader_configuration[dim]["aspect"] === asp)) {
-                grid_string += "<div class=\"row mb-2 align-items-center \" style='background-color: " + color_palette[color_counter] + "'>";
-                grid_string += "<div class=\"col align-self-center input-group-text text-wrap\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" + grader_configuration[dim]["desc"] + "\">" + dim.replace(/_/g, " ") + " (" + grader_configuration[dim].min + "-" + grader_configuration[dim].max + ") <span class='small text-muted ms-2'>w" + grader_configuration[dim]["weight"] + "</span></div>";
+                grid_string += "<div class=\"row flex-nowrap mb-2 align-items-center \" style='background-color: " + color_palette[color_counter] + "'>";
+                grid_string += "<div class=\"col-2 overflow-hidden align-self-center input-group-text text-wrap\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" + grader_configuration[dim]["desc"] + "\">" + dim.replace(/_/g, " ") + " (" + grader_configuration[dim].min + "-" + grader_configuration[dim].max + ") <span class='small text-muted ms-2'>w" + grader_configuration[dim]["weight"] + "</span></div>";
                 for (let student of active_group) {
 
                     if (grader_configuration[dim]["group_mark"]) {
@@ -175,23 +183,23 @@ function init_grading(loadedMarks) {
         }
 
         // Aspect Grade
-        grid_string += "<div class=\"row mb-2 align-items-center\" style='background-color: " + color_palette[color_counter] + "'>";
-        grid_string += "<div class=\"col align-self-center input-group-text text-wrap\"><b>" + asp.replace(/_/g, " ") + " Grade (" + grader_configuration["exam_settings"]["scale_min"] + "-" + grader_configuration["exam_settings"]["scale_max"] + ")</b></div>";
+        grid_string += "<div class=\"row flex-nowrap mb-2 align-items-center\" style='background-color: " + color_palette[color_counter] + "'>";
+        grid_string += "<div class=\"col-2 overflow-hidden align-self-center input-group-text text-wrap\"><b>" + asp.replace(/_/g, " ") + " Grade (" + grader_configuration["exam_settings"]["scale_min"] + "-" + grader_configuration["exam_settings"]["scale_max"] + ")</b></div>";
         for (let student of active_group) {
             grid_string += "<div class=\"col align-self-center text-center\"><input step='0.01' type='number' min='" + grader_configuration["exam_settings"]["scale_min"] + "' data-student='" + student[0] + "' data-dimension='grade' data-weight='" + aspect_weight + "' data-aspect='" + asp + "' style=\"width: 70px;\" disabled></div>"
         }
         grid_string += "</div>";
 
         // Spacing Row
-        grid_string += "<div class=\"row\"></div>";
+        grid_string += "<div class=\"row flex-nowrap\"></div>";
         color_counter++;
     }
-    grid_string += "<div class=\"row\"><div class='col'><b><u>Total Grade</u> (" + grader_configuration["exam_settings"]["scale_min"] + "-" + grader_configuration["exam_settings"]["scale_max"] + ")</b></div>";
+    grid_string += "<div class=\"row flex-nowrap\"><div class='col-2 overflow-hidden'><b><u>Total Grade</u> (" + grader_configuration["exam_settings"]["scale_min"] + "-" + grader_configuration["exam_settings"]["scale_max"] + ")</b></div>";
     for (let student of active_group) {
         grid_string += "<div class='col align-self-center text-center'><input step='0.01' type='number' min='" + grader_configuration["exam_settings"]["scale_min"] + "' data-student='" + student[0] + "' data-dimension='total_grade' style=\"width: 70px;\" disabled></div>";
     }
     grid_string += "</div>";
-    grid_string += "<div class=\"row\"><div class='col'>Comment</div>";
+    grid_string += "<div class=\"row flex-nowrap\"><div class='col-2 overflow-hidden'>Comment</div>";
     for (let student of active_group) {
         grid_string += "<div class='col align-self-center text-center mt-4'><textarea data-student='" + student[0] + "' data-dimension='comment_field' style=\"width: 100%; margin: 7px\" size='4'></textarea></div>";
     }
@@ -482,6 +490,17 @@ function exportCSV(numberOfFilesProcessed, totalFiles, csvString){
         window.location.reload(true)
     }
 }
+
+function gradingModeChanged(){
+    if ($( "#group_mode_selector option:selected" ).text() == ""){
+        $("#class_file").prop( "disabled", true );
+    }
+    else {
+        $("#class_file").prop( "disabled", false );
+
+    }
+}
+
 function replaceAll(sentence, regx, replaceBy) {
    while(sentence.indexOf(regx) > -1){
         sentence = sentence.replace(regx, replaceBy);

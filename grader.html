@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Tiny Grader</title>
     <link href="scripts/bootstrap-5.0.1-dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="scripts/bootstrap-5.0.1-dist/js/bootstrap.bundle.min.js"></script>
@@ -23,7 +24,7 @@
 
 <body>
 <div class="container-fluid display-4 text-center mt-3 mb-3">Tiny Grader</div>
-<div class="container-fluid text-center mt-3 mb-3" id="classLabel">Class Label</div>
+<div class="container-fluid display-6 text-center text-muted mt-3 mb-3" id="classLabel">Class Label</div>
 <div id="startup_box" class="container-fluid m-2">
     <div class="row">
         <div class="col d-block text-center border" style="background-color: #ffff9c">
@@ -35,8 +36,14 @@
     <div class="row">
         <div class="col d-block text-center border" style="background-color: #ffff9c">
             <div id="class_list_loader">
+                <label for="group_mode_selector">Select mode: </label><br>
+                <select id="group_mode_selector" onchange="gradingModeChanged()">
+                    <option></option>
+                    <option value="group">Student Groups</option>
+                    <option value="person">Individual Students</option>
+                </select><br>
                 <label for="class_area">Choose student list (*.csv): </label><br>
-                <input type="file" id="class_file" accept=".csv" onchange="read_class()" name="">
+                <input type="file" id="class_file" accept=".csv" onchange="read_class()" name="" disabled>
                 <textarea id="class_area" disabled cols="80" rows="10" style="display: none"></textarea>
             </div>
         </div>
@@ -55,7 +62,7 @@
     </div>
     <div id="class_list_selector" class="row" style="display: none; background-color: #ffff9c">
         <div class="col d-block text-center border">
-            <label for="group_selector">Choose group for grading:</label><br>
+            <label for="group_selector">Select for grading:</label><br>
             <select id="group_selector" size="5" style="width: 33%"><option>No class data loaded</option></select><br>
             <button onclick="init_grading()">Start Grading</button>
         </div>

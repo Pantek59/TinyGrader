@@ -1,0 +1,40 @@
+[config]
+scheme = "BSBU.ini"
+reviewer = "Peter""
+class = "BSBU Reds"
+
+[student1]
+comment_field = "This%20needed%0Aa%20second%20line"
+[student1.Language]
+Range = 2.5
+Fluency = 1.5
+Pronunciation_and_Elocution = 1.5
+[student1.Presentation]
+Body_Language = 2.5
+Structure = 2.5
+Visuals = 3
+Handling_of_Questions = 5
+
+[student2]
+comment_field = "Next%20time!"
+[student2.Language]
+Range = 4
+Fluency = 3
+Pronunciation_and_Elocution = 3
+[student2.Presentation]
+Body_Language = 3
+Structure = 3
+Visuals = 3.5
+Handling_of_Questions = 4
+
+[student3]
+comment_field = "A%20pleasure%20to%20watch"
+[student3.Language]
+Range = 5
+Fluency = 3
+Pronunciation_and_Elocution = 2.5
+[student3.Presentation]
+Body_Language = 3
+Structure = 3
+Visuals = 3.5
+Handling_of_Questions = 5
